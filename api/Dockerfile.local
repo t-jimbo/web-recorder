@@ -1,0 +1,17 @@
+FROM python:3.8 
+USER root
+
+RUN apt-get update
+RUN apt-get -y install locales 
+RUN apt-get install -y vim less
+
+WORKDIR /root
+COPY ./ ./root/
+
+RUN pip install --upgrade pip
+RUN pip install --upgrade setuptools
+RUN pip install -r ./root/requirements.txt
+RUN python -m pip install jupyterlab
+
+CMD ["python3", "./root/app/main.py"]
+
