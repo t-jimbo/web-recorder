@@ -1,5 +1,5 @@
 import { RecorderContext } from "./RecorderContext.ts";
-import { PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useState } from "react";
 
 export type RecorderProviderProps = PropsWithChildren;
 
@@ -11,35 +11,52 @@ export const RecorderProvider: React.FC<RecorderProviderProps> = ({
     input: MediaStreamAudioSourceNode;
     processor: ScriptProcessorNode;
   } | null>();
-  const [isRecording, setIsRecording] = useState(false);
-  const [src] = useState<string>();
 
   useEffect(() => {
+    // TODO: hooksに切り出す
     (async () => setRecorder(await init()))();
   }, []);
-  if (!recorder) return <div>audio/webm is not supported</div>;
+
+  const [conn, setConn] = useState<WebSocket>();
+  const [isRecording, setIsRecording] = useState(false);
 
   const handlerStart = () => {
     const conn = new WebSocket("ws://localhost:8000/websocket");
+    setConn(conn);
 
-    if (conn.readyState !== 1) return;
+    if (conn.readyState === WebSocket.CONNECTING) {
+      console.log("websocket is connecting...");
+    } else if (conn.readyState !== WebSocket.OPEN) {
+      console.warn("websocket is closed. status: ", conn.readyState);
+      return;
+    }
+
+    if (!recorder) {
+      return;
+    }
 
     const { context, input, processor } = recorder;
 
+    // 書き込み処理。TODO: 解読する
     input.connect(processor);
     processor.connect(context.destination);
-
-    processor.onaudioprocess = function (e) {
-      const voice = e.inputBuffer.getChannelData(0);
-      conn.send(voice.buffer); // websocketで送る
+    processor.onaudioprocess = (e) => {
+      if (conn.readyState === WebSocket.OPEN) {
+        const voice = e.inputBuffer.getChannelData(0);
+        conn.send(voice.buffer); // websocketで送る
+      }
     };
 
     setIsRecording(true);
   };
 
-  const handleStop = () => {
+  const handleStop = useCallback(() => {
+    if (conn?.readyState === WebSocket.OPEN) {
+      conn?.close();
+    }
+
     setIsRecording(false);
-  };
+  }, [conn]);
 
   return (
     <RecorderContext.Provider
@@ -47,7 +64,6 @@ export const RecorderProvider: React.FC<RecorderProviderProps> = ({
         isRecording,
         onStart: handlerStart,
         onStop: handleStop,
-        srcURL: src,
       }}
     >
       {children}
