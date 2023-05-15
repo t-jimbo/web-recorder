@@ -1,10 +1,7 @@
-import tornado.ioloop
-import tornado.web
-import tornado.websocket
-
 import wave
-import numpy as np
 
+import numpy as np
+import tornado.websocket
 
 SAMPLE_SIZE = 2
 SAMPLE_RATE = 48000
@@ -47,4 +44,3 @@ if __name__ == "__main__":
     app.listen(8000)
     print("listening...")
     tornado.ioloop.IOLoop.instance().start()
-
