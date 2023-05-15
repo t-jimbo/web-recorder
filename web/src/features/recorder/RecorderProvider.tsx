@@ -11,7 +11,7 @@ export const RecorderProvider: React.FC<RecorderProviderProps> = ({
     input: MediaStreamAudioSourceNode;
     processor: ScriptProcessorNode;
   } | null>();
-  const [isRecording, setIsReconding] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const [src] = useState<string>();
 
   useEffect(() => {
@@ -34,11 +34,11 @@ export const RecorderProvider: React.FC<RecorderProviderProps> = ({
       conn.send(voice.buffer); // websocketで送る
     };
 
-    setIsReconding(true);
+    setIsRecording(true);
   };
 
   const handleStop = () => {
-    setIsReconding(false);
+    setIsRecording(false);
   };
 
   return (
