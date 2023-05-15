@@ -8,7 +8,7 @@ import numpy as np
 
 SAMPLE_SIZE = 2
 SAMPLE_RATE = 48000
-PATH = '/path/to/output.wav'
+PATH = './output.wav'
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -34,6 +34,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.voice.clear()
         print("closed")
 
+    def check_origin(self, origin):
+        # NOTE: ローカルで動かすだけなので
+        return True
+
 
 app = tornado.web.Application([
     (r"/websocket", WebSocketHandler)
@@ -41,5 +45,6 @@ app = tornado.web.Application([
 
 if __name__ == "__main__":
     app.listen(8000)
+    print("listening...")
     tornado.ioloop.IOLoop.instance().start()
 
