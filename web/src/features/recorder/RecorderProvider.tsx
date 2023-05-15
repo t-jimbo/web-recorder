@@ -6,9 +6,13 @@ export type RecorderProviderProps = PropsWithChildren;
 export const RecorderProvider: React.FC<RecorderProviderProps> = ({
   children,
 }) => {
-  const [recorder, setRecorder] = useState<MediaRecorder | null>();
+  const [recorder, setRecorder] = useState<{
+    context: AudioContext;
+    input: MediaStreamAudioSourceNode;
+    processor: ScriptProcessorNode;
+  } | null>();
   const [isRecording, setIsReconding] = useState(false);
-  const [src, setSrc] = useState<string>();
+  const [src] = useState<string>();
 
   useEffect(() => {
     (async () => setRecorder(await init()))();
@@ -16,18 +20,26 @@ export const RecorderProvider: React.FC<RecorderProviderProps> = ({
   if (!recorder) return <div>audio/webm is not supported</div>;
 
   const handlerStart = () => {
-    recorder.start();
+    const conn = new WebSocket("ws://localhost:8000/websocket");
+
+    if (conn.readyState !== 1) return;
+
+    const { context, input, processor } = recorder;
+
+    input.connect(processor);
+    processor.connect(context.destination);
+
+    processor.onaudioprocess = function (e) {
+      const voice = e.inputBuffer.getChannelData(0);
+      conn.send(voice.buffer); // websocketで送る
+    };
+
     setIsReconding(true);
   };
 
   const handleStop = () => {
-    recorder.stop();
     setIsReconding(false);
   };
-
-  recorder.addEventListener("dataavailable", (e) => {
-    setSrc(URL.createObjectURL(e.data));
-  });
 
   return (
     <RecorderContext.Provider
@@ -52,7 +64,14 @@ const init = async () => {
     console.warn("audio/webm is not supported");
     return null;
   }
-  return new MediaRecorder(stream, {
-    mimeType: "audio/webm",
-  });
+
+  const context = new AudioContext();
+  const input = context.createMediaStreamSource(stream);
+  const processor = context.createScriptProcessor(1024, 1, 1);
+
+  return {
+    context,
+    input,
+    processor,
+  };
 };
