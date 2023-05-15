@@ -1,24 +1,16 @@
 import { RecorderContext } from "./RecorderContext.ts";
-import { PropsWithChildren, useCallback, useEffect, useState } from "react";
+import { PropsWithChildren, useCallback, useState } from "react";
+import { useRecorder } from "./useRecorder.ts";
 
 export type RecorderProviderProps = PropsWithChildren;
 
 export const RecorderProvider: React.FC<RecorderProviderProps> = ({
   children,
 }) => {
-  const [recorder, setRecorder] = useState<{
-    context: AudioContext;
-    input: MediaStreamAudioSourceNode;
-    processor: ScriptProcessorNode;
-  } | null>();
-
-  useEffect(() => {
-    // TODO: hooksに切り出す
-    (async () => setRecorder(await init()))();
-  }, []);
-
   const [conn, setConn] = useState<WebSocket>();
   const [isRecording, setIsRecording] = useState(false);
+
+  const { webAudio } = useRecorder();
 
   const handlerStart = () => {
     const conn = new WebSocket("ws://localhost:8000/websocket");
@@ -31,13 +23,15 @@ export const RecorderProvider: React.FC<RecorderProviderProps> = ({
       return;
     }
 
-    if (!recorder) {
+    if (!webAudio) {
       return;
     }
 
-    const { context, input, processor } = recorder;
+    const { context, input, processor } = webAudio;
 
-    // 書き込み処理。TODO: 解読する
+    // recorder.start()
+
+    // 書き込み処理。
     input.connect(processor);
     processor.connect(context.destination);
     processor.onaudioprocess = (e) => {
@@ -47,12 +41,25 @@ export const RecorderProvider: React.FC<RecorderProviderProps> = ({
       }
     };
 
+    // recorder.addEventListener("dataavailable", async (e) => {
+    //   if (conn.readyState === WebSocket.OPEN) {
+    //     // websocketで送る。データ型はArrayBuffer？
+    //     console.log("sending");
+    //     conn.send(await e.data.arrayBuffer());
+    //   }
+    // });
+
     setIsRecording(true);
   };
 
-  const handleStop = useCallback(() => {
+  const handleStop = useCallback(async () => {
+    // recorder?.stop();
     if (conn?.readyState === WebSocket.OPEN) {
-      conn?.close();
+      console.log("closing websocket");
+      setTimeout(() => {
+        // FIXME: recorderのstop→conn.send→conn.closeとしたいため仮で1sec待つ
+        conn?.close();
+      }, 1000);
     }
 
     setIsRecording(false);
@@ -69,25 +76,4 @@ export const RecorderProvider: React.FC<RecorderProviderProps> = ({
       {children}
     </RecorderContext.Provider>
   );
-};
-
-/**
- * mediaStreamを取得して、初期化したMediaRecorderを返す
- */
-const init = async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  if (!MediaRecorder.isTypeSupported("audio/webm")) {
-    console.warn("audio/webm is not supported");
-    return null;
-  }
-
-  const context = new AudioContext();
-  const input = context.createMediaStreamSource(stream);
-  const processor = context.createScriptProcessor(1024, 1, 1);
-
-  return {
-    context,
-    input,
-    processor,
-  };
 };
