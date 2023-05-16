@@ -18,6 +18,9 @@ dependencies:
     version: 18.2.0(react@18.2.0)
 
 devDependencies:
+  '@types/audioworklet':
+    specifier: ^0.0.46
+    version: 0.0.46
   '@types/react':
     specifier: ^18.0.28
     version: 18.0.28
@@ -770,6 +773,10 @@ packages:
       '@swc/core-win32-arm64-msvc': 1.3.57
       '@swc/core-win32-ia32-msvc': 1.3.57
       '@swc/core-win32-x64-msvc': 1.3.57
+    dev: true
+
+  /@types/audioworklet@0.0.46:
+    resolution: {integrity: sha512-LWJ9gC7sTsV/r8Vud0+WChc18tSHtYzr0/z4IFVtDuCQ2nsDxWM5yUNsVIN64F5foipNzGTHq3GmnyLhosJ9Fw==}
     dev: true
 
   /@types/json-schema@7.0.11:
