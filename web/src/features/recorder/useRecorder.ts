@@ -45,8 +45,7 @@ export const useRecorder = () => {
 };
 
 /**
- * mediaStreamを取得して、初期化したAudioContextを返す
- * TODO: どっちかに統一する
+ * web audio API ver
  */
 const initWebAudio = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -56,13 +55,21 @@ const initWebAudio = async () => {
   }
 
   const context = new AudioContext();
-  const input = context.createMediaStreamSource(stream);
-  const processor = context.createScriptProcessor(2048, 1, 1);
+  await context.audioWorklet.addModule("audio-recorder.js"); // <3>
+
+  const input = context.createMediaStreamSource(stream); // <4>
+  const worklet = new AudioWorkletNode(context, "audio-recorder"); // <5>
+
+  worklet.port.start();
+
+  // mediaStream, worklet, スピーカーを接続します。なお、workletは何も出力しないのでスピーカーから音声は再生されない
+  input.connect(worklet); // NOTE: おそらくこれを先にやらないとworkletProcessorのchannelがundefinedになる
+  worklet.connect(context.destination);
 
   return {
     context,
     input,
-    processor,
+    worklet,
   };
 };
 
@@ -70,7 +77,7 @@ export const useWebAudioRecorder = () => {
   const [webAudio, setWebAudio] = useState<{
     context: AudioContext;
     input: MediaStreamAudioSourceNode;
-    processor: ScriptProcessorNode;
+    worklet: AudioWorkletNode;
   } | null>();
 
   useEffect(() => {
@@ -80,24 +87,26 @@ export const useWebAudioRecorder = () => {
   const startRecording = useCallback(
     (send: (data: ArrayBufferLike) => void) => {
       if (!webAudio) return;
-      const { context, input, processor } = webAudio;
+      const { context, worklet } = webAudio;
 
-      input.connect(processor);
-      processor.connect(context.destination);
-      processor.onaudioprocess = (e) => {
-        const voice = e.inputBuffer.getChannelData(0);
-        send(voice.buffer); // websocketで送る
-      };
+      // sendを受け取らないといけないのでここにある
+      worklet.port.addEventListener("message", (event) => {
+        // wsでサーバーに送る
+        send(event.data.channel as Float32Array); // FIXME: 型なんとかする
+      });
+
+      const parameter = worklet.parameters.get("isRecording");
+      if (parameter) parameter.setValueAtTime(1, context.currentTime);
     },
     [webAudio]
   );
 
   const stopRecording = useCallback(() => {
     if (!webAudio) return;
-    const { input, processor } = webAudio;
+    const { context, worklet } = webAudio;
 
-    input.disconnect(processor);
-    processor.disconnect();
+    const parameter = worklet.parameters.get("isRecording");
+    if (parameter) parameter.setValueAtTime(0, context.currentTime);
   }, [webAudio]);
 
   return {
