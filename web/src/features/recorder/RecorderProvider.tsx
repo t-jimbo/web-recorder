@@ -1,6 +1,6 @@
 import { RecorderContext } from "./RecorderContext.ts";
 import { PropsWithChildren, useCallback, useState } from "react";
-import { useRecorder } from "./useRecorder.ts";
+import { useWebAudioRecorder as useRecorder } from "./useRecorder.ts";
 
 export type RecorderProviderProps = PropsWithChildren;
 
@@ -10,7 +10,7 @@ export const RecorderProvider: React.FC<RecorderProviderProps> = ({
   const [conn, setConn] = useState<WebSocket>();
   const [isRecording, setIsRecording] = useState(false);
 
-  const { webAudio } = useRecorder();
+  const { startRecording, stopRecording } = useRecorder();
 
   const handlerStart = () => {
     const conn = new WebSocket("ws://localhost:8000/websocket");
@@ -23,37 +23,18 @@ export const RecorderProvider: React.FC<RecorderProviderProps> = ({
       return;
     }
 
-    if (!webAudio) {
-      return;
-    }
-
-    const { context, input, processor } = webAudio;
-
-    // recorder.start()
-
-    // 書き込み処理。
-    input.connect(processor);
-    processor.connect(context.destination);
-    processor.onaudioprocess = (e) => {
+    startRecording((data) => {
       if (conn.readyState === WebSocket.OPEN) {
-        const voice = e.inputBuffer.getChannelData(0);
-        conn.send(voice.buffer); // websocketで送る
+        conn.send(data);
       }
-    };
-
-    // recorder.addEventListener("dataavailable", async (e) => {
-    //   if (conn.readyState === WebSocket.OPEN) {
-    //     // websocketで送る。データ型はArrayBuffer？
-    //     console.log("sending");
-    //     conn.send(await e.data.arrayBuffer());
-    //   }
-    // });
+    });
 
     setIsRecording(true);
   };
 
   const handleStop = useCallback(async () => {
-    // recorder?.stop();
+    stopRecording();
+
     if (conn?.readyState === WebSocket.OPEN) {
       console.log("closing websocket");
       setTimeout(() => {
@@ -63,7 +44,7 @@ export const RecorderProvider: React.FC<RecorderProviderProps> = ({
     }
 
     setIsRecording(false);
-  }, [conn]);
+  }, [conn, stopRecording]);
 
   return (
     <RecorderContext.Provider
