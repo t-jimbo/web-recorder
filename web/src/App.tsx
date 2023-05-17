@@ -1,4 +1,4 @@
-import { RecorderPage } from "./features/recorder/RecorderPage.tsx";
+import RecorderPage from "./pages/recorder.tsx";
 
 function App() {
   return <RecorderPage />;

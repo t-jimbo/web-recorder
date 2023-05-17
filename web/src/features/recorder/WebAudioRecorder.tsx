@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import { useContext } from "react";
 import { RecorderContext } from "./RecorderContext.ts";
 
-export const RecorderPage: React.FC = () => {
+export const WebAudioRecorder: React.FC = () => {
   const { isRecording, onStart, onStop } = useContext(RecorderContext);
 
   return (
