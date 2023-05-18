@@ -27,3 +27,23 @@ export const MediaStreamRecorder: React.FC = () => {
     </Stack>
   );
 };
+
+export const RecorderForHeader: React.FC = () => {
+  const {
+    startRecording: onStart,
+    stopRecording: onStop,
+    isRecording,
+    src,
+  } = useContext(MediaStreamRecorderContext);
+  return (
+    <Stack direction="row">
+      <Button onClick={onStart} disabled={isRecording}>
+        Start
+      </Button>
+      <Button onClick={onStop} disabled={!isRecording}>
+        Stop
+      </Button>
+      <audio controls src={src} />
+    </Stack>
+  );
+};

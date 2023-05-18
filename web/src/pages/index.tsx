@@ -11,12 +11,12 @@ const Page: React.FC = () => {
       <Stack rowGap={1}>
         <Typography>録音機能を試す</Typography>
         <Stack direction="row" columnGap={2}>
-          <Button
-            variant="outlined"
-            onClick={() => navigate("simple-recorder")}
-          >
-            録音機能サンプル
-          </Button>
+          {/*<Button*/}
+          {/*  variant="outlined"*/}
+          {/*  onClick={() => navigate("simple-recorder")}*/}
+          {/*>*/}
+          {/*  録音機能サンプル*/}
+          {/*</Button>*/}
           <Button variant="outlined" onClick={() => navigate("deal")}>
             一連の流れで試す
           </Button>
