@@ -1,0 +1,59 @@
+name: Deploy Web
+
+on:
+  workflow_dispatch:
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - web
+
+env:
+  # とりあえずで
+  node-version: "16"
+  pnpm-version: "7"
+
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/checkout@v3
+
+        - uses: pnpm/action-setup@v2
+          with:
+            version: ${{ env.pnpm-version }}
+
+        - uses: actions/setup-node@v3
+          with:
+            node-version: ${{ env.node-version }}
+            cache: "pnpm"
+
+        - uses: actions/cache@v3
+          id: pnpm-cache
+          with:
+            path: node_modules
+            key: ${{ runner.os }}-pnpm-${{ hashFiles(format('{0}{1}', github.workspace, '/pnpm-lock.yaml')) }}
+            restore-keys: |
+              ${{ runner.os }}-pnpm-
+
+        - name: Install dependencies
+          if: steps.pnpm-cache.outputs.cache-hit != 'true'
+          run: pnpm install --frozen-lockfile --prefer-offline
+          env:
+            NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Build
+          run: pnpm build
+
+        - uses: google-github-actions/auth@v1
+          with:
+            access_token_lifetime: 600s
+            project_id: ${{ secrets.project_id }}
+            workload_identity_provider: projects/${{ secrets.project_number }}/locations/global/workloadIdentityPools/${{ secrets.workload_identity_pool_id }}/providers/github-actions-provider
+            service_account: ${{ secrets.service_account }}
+
+        - uses: google-github-actions/setup-gcloud@v1
+
+        - name: Deploy to GCS
+          run: gsutil rsync -R dist gs://${{ secrets.bucket_name }}
