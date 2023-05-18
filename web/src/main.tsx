@@ -6,19 +6,27 @@ import { AuthProvider } from "./features/auth/AuthProvider.tsx";
 import Index from "./pages/index.tsx";
 import SimpleRecorder from "./pages/simple-recorder.tsx";
 import Deal from "./pages/deal/index.tsx";
+import Images from "./pages/deal/images.tsx";
+import { Layout } from "./features/mediaStream/Layout.tsx";
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <Index />,
-  },
-  {
-    path: "/simple-recorder",
-    element: <SimpleRecorder />,
-  },
-  {
-    path: "/deal",
-    element: <Deal />,
+    element: <Layout />,
+    children: [
+      {
+        path: "/",
+        element: <Index />,
+      },
+      {
+        path: "/simple-recorder",
+        element: <SimpleRecorder />,
+      },
+      {
+        path: "/deal",
+        element: <Deal />,
+      },
+      { path: "/deal/images", element: <Images /> },
+    ],
   },
 ]);
 
