@@ -8,36 +8,41 @@ export const useRecorder = () => {
   const [src, setSrc] = useState("");
   const [isRecording, setIsRecording] = useState(false);
 
-  const startRecording = useCallback(async (send: (data: Blob) => void) => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream);
-    setRecorder(recorder);
+  const startRecording = useCallback(
+    async (send: (data: Blob) => void) => {
+      if (isRecording) return;
 
-    if (!recorder) {
-      console.error("recorder is null");
-      return;
-    }
-    recorder.start();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      setRecorder(recorder);
 
-    recorder.addEventListener("dataavailable", (e) => {
-      send(e.data);
-      setSrc(URL.createObjectURL(e.data));
-    });
+      if (!recorder) {
+        console.error("recorder is null");
+        return;
+      }
+      recorder.start();
 
-    recorder.addEventListener("stop", (e) => {
-      console.log("stopped caused by", e);
-      stream.getTracks().forEach((track) => track.stop());
-    });
+      recorder.addEventListener("dataavailable", (e) => {
+        send(e.data);
+        setSrc(URL.createObjectURL(e.data));
+      });
 
-    setIsRecording(true);
-  }, []);
+      recorder.addEventListener("stop", (e) => {
+        console.log("stopped caused by", e);
+        stream.getTracks().forEach((track) => track.stop());
+      });
+
+      setIsRecording(true);
+    },
+    [isRecording]
+  );
 
   const stopRecording = useCallback(() => {
-    if (!recorder) return;
+    if (!recorder || !isRecording) return;
     recorder.stop();
 
     setIsRecording(false);
-  }, [recorder]);
+  }, [recorder, isRecording]);
 
   /**
    * 一時停止ができるっぽいので試してみたけどよくわからん
