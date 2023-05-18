@@ -4,6 +4,7 @@ import { MediaStreamRecorderProvider } from "./features/mediaStream/RecorderProv
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Index from "./pages/index.tsx";
 import SimpleRecorder from "./pages/simple-recorder.tsx";
+import { AuthProvider } from "./features/auth/AuthProvider.tsx";
 
 const router = createBrowserRouter([
   {
@@ -18,8 +19,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <MediaStreamRecorderProvider>
-      <RouterProvider router={router} />
-    </MediaStreamRecorderProvider>
+    <AuthProvider>
+      <MediaStreamRecorderProvider>
+        <RouterProvider router={router} />
+      </MediaStreamRecorderProvider>
+    </AuthProvider>
   </React.StrictMode>
 );
