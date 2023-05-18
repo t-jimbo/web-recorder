@@ -59,7 +59,7 @@ jobs:
         with:
           access_token_lifetime: 600s
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_WL_POOL_ID }}/providers/github-actions-provider
+          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_WL_POOL_ID }}/providers/github
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - uses: google-github-actions/setup-gcloud@v1
