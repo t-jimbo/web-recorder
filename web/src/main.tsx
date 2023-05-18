@@ -2,9 +2,10 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { MediaStreamRecorderProvider } from "./features/mediaStream/RecorderProvider.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { AuthProvider } from "./features/auth/AuthProvider.tsx";
 import Index from "./pages/index.tsx";
 import SimpleRecorder from "./pages/simple-recorder.tsx";
-import { AuthProvider } from "./features/auth/AuthProvider.tsx";
+import Deal from "./pages/deal/index.tsx";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +15,10 @@ const router = createBrowserRouter([
   {
     path: "/simple-recorder",
     element: <SimpleRecorder />,
+  },
+  {
+    path: "/deal",
+    element: <Deal />,
   },
 ]);
 

@@ -9,7 +9,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [value, setValue] = useState("");
 
-  if (!isAuthenticated) {
+  if (import.meta.env.NODE_ENV === "production" && !isAuthenticated) {
     return (
       <Stack direction="row">
         <TextField

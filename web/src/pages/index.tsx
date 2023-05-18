@@ -9,8 +9,13 @@ const Page: React.FC = () => {
   return (
     <Stack rowGap={3}>
       <Stack>
-        <Typography>Recording</Typography>
-        <Button onClick={() => navigate("simple-recorder")}>録音</Button>
+        <Typography>録音機能を試す</Typography>
+        <Stack direction="row">
+          <Button onClick={() => navigate("simple-recorder")}>
+            録音機能サンプル
+          </Button>
+          <Button onClick={() => navigate("deal")}>一連の流れで試す</Button>
+        </Stack>
       </Stack>
     </Stack>
   );
