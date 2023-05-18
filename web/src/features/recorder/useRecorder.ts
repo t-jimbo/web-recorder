@@ -1,50 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
 /**
- * mediaStreamを取得して、初期化したMediaRecorderを返す
- */
-const init = async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  if (!MediaRecorder.isTypeSupported("audio/webm")) {
-    console.warn("audio/webm is not supported");
-    return null;
-  }
-  return new MediaRecorder(stream, {
-    mimeType: "audio/webm",
-  });
-};
-
-export const useRecorder = () => {
-  const [recorder, setRecorder] = useState<MediaRecorder | null>();
-
-  useEffect(() => {
-    (async () => setRecorder(await init()))();
-  }, []);
-
-  const startRecording = useCallback(
-    (send: (data: Blob) => void) => {
-      if (!recorder) return;
-      recorder.start();
-
-      recorder.addEventListener("dataavailable", async (e) => {
-        send(await e.data);
-      });
-    },
-    [recorder]
-  );
-
-  const stopRecording = useCallback(() => {
-    if (!recorder) return;
-    recorder.stop();
-  }, [recorder]);
-
-  return {
-    startRecording,
-    stopRecording,
-  };
-};
-
-/**
  * web audio API ver
  */
 const initWebAudio = async () => {
