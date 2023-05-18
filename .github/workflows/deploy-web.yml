@@ -13,47 +13,47 @@ env:
   node-version: "16"
   pnpm-version: "7"
 
-  jobs:
-    deploy:
-      runs-on: ubuntu-latest
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-      steps:
-        - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v3
 
-        - uses: pnpm/action-setup@v2
-          with:
-            version: ${{ env.pnpm-version }}
+      - uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.pnpm-version }}
 
-        - uses: actions/setup-node@v3
-          with:
-            node-version: ${{ env.node-version }}
-            cache: "pnpm"
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.node-version }}
+          cache: "pnpm"
 
-        - uses: actions/cache@v3
-          id: pnpm-cache
-          with:
-            path: node_modules
-            key: ${{ runner.os }}-pnpm-${{ hashFiles(format('{0}{1}', github.workspace, '/pnpm-lock.yaml')) }}
-            restore-keys: |
-              ${{ runner.os }}-pnpm-
+      - uses: actions/cache@v3
+        id: pnpm-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles(format('{0}{1}', github.workspace, '/pnpm-lock.yaml')) }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
-        - name: Install dependencies
-          if: steps.pnpm-cache.outputs.cache-hit != 'true'
-          run: pnpm install --frozen-lockfile --prefer-offline
-          env:
-            NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install dependencies
+        if: steps.pnpm-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile --prefer-offline
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-        - name: Build
-          run: pnpm build
+      - name: Build
+        run: pnpm build
 
-        - uses: google-github-actions/auth@v1
-          with:
-            access_token_lifetime: 600s
-            project_id: ${{ secrets.GCP_PROJECT_ID }}
-            workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_WL_POOL_ID }}/providers/github-actions-provider
-            service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/auth@v1
+        with:
+          access_token_lifetime: 600s
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_WL_POOL_ID }}/providers/github-actions-provider
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-        - uses: google-github-actions/setup-gcloud@v1
+      - uses: google-github-actions/setup-gcloud@v1
 
-        - name: Deploy to GCS
-          run: gsutil rsync -R dist gs://${{ secrets.GCS_BUCKET }}
+      - name: Deploy to GCS
+        run: gsutil rsync -R dist gs://${{ secrets.GCS_BUCKET }}
