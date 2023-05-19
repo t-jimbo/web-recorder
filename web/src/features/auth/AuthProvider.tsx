@@ -6,10 +6,10 @@ import Stack from "@mui/material/Stack";
 export type AuthProviderProps = PropsWithChildren;
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [value, setValue] = useState("");
 
-  if (import.meta.env.NODE_ENV === "production" && !isAuthenticated) {
+  if (import.meta.env.PROD && !isAuthenticated) {
     return (
       <Stack direction="row">
         <TextField

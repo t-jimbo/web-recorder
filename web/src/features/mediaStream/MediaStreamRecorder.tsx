@@ -1,8 +1,8 @@
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 import { useContext } from "react";
 import { MediaStreamRecorderContext } from "./context.ts";
-import { Typography } from "@mui/material";
 
 export const MediaStreamRecorder: React.FC = () => {
   const {
@@ -23,7 +23,7 @@ export const MediaStreamRecorder: React.FC = () => {
         </Button>
       </Stack>
 
-      <audio controls src={src} />
+      <audio controls src={src?.url} />
     </Stack>
   );
 };
@@ -35,6 +35,10 @@ export const RecorderForHeader: React.FC = () => {
     isRecording,
     src,
   } = useContext(MediaStreamRecorderContext);
+
+  const extension = src?.type?.split("audio/")[1]?.split(";")[0];
+  console.log(extension);
+
   return (
     <Stack direction="row">
       <Button onClick={onStart} disabled={isRecording}>
@@ -43,7 +47,18 @@ export const RecorderForHeader: React.FC = () => {
       <Button onClick={onStop} disabled={!isRecording}>
         Stop
       </Button>
-      <audio controls src={src} />
+      <audio controls src={src?.url} />
+      <Button
+        onClick={() => {
+          const a = document.createElement("a");
+          a.href = src?.url ?? "";
+          a.download = "sample-audio." + extension;
+          a.click();
+        }}
+        disabled={!src}
+      >
+        ダウンロード
+      </Button>
     </Stack>
   );
 };
