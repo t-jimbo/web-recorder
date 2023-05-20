@@ -8,6 +8,8 @@ import SimpleRecorder from "./pages/simple-recorder.tsx";
 import Deal from "./pages/deal/index.tsx";
 import Images from "./pages/deal/images.tsx";
 import { Layout } from "./features/mediaStream/Layout.tsx";
+import Oauth from "./pages/oauth.tsx";
+import GCS from "./pages/gcs.tsx";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +29,11 @@ const router = createBrowserRouter([
       },
       { path: "/deal/images", element: <Images /> },
     ],
+  },
+  { path: "/gcs", element: <GCS /> },
+  {
+    path: "oauth",
+    element: <Oauth />,
   },
 ]);
 
