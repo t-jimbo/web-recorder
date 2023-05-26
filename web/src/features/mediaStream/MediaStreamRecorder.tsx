@@ -37,7 +37,6 @@ export const RecorderForHeader: React.FC = () => {
   } = useContext(MediaStreamRecorderContext);
 
   const extension = src?.type?.split("audio/")[1]?.split(";")[0];
-  console.log(extension);
 
   return (
     <Stack direction="row">

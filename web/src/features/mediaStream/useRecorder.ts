@@ -7,6 +7,7 @@ export const useRecorder = () => {
   const [recorder, setRecorder] = useState<MediaRecorder | null>();
   const [src, setSrc] = useState<{ url: string; type: string }>();
   const [isRecording, setIsRecording] = useState(false);
+  const [intervalID, setIntervalID] = useState<number>();
 
   const startRecording = useCallback(
     async (send: (data: Blob) => void) => {
@@ -36,6 +37,11 @@ export const useRecorder = () => {
       });
 
       setIsRecording(true);
+      // 一秒おきに本当に録音できているかstateをチェックする
+      const id = setInterval(() => {
+        setIsRecording(recorder.state === "recording");
+      }, 1000);
+      setIntervalID(id);
     },
     [isRecording]
   );
@@ -45,7 +51,8 @@ export const useRecorder = () => {
     recorder.stop();
 
     setIsRecording(false);
-  }, [recorder, isRecording]);
+    clearInterval(intervalID);
+  }, [recorder, isRecording, intervalID]);
 
   /**
    * 一時停止ができるっぽいので試してみたけどよくわからん

@@ -6,6 +6,7 @@ import { useContext, useEffect } from "react";
 import Button from "@mui/material/Button";
 import { Divider } from "@mui/material";
 import { RecorderForHeader } from "./MediaStreamRecorder.tsx";
+import { TimeCount } from "./TimeCount.tsx";
 
 export const Layout: React.FC = () => {
   const { isRecording } = useContext(MediaStreamRecorderContext);
@@ -28,6 +29,7 @@ export const Layout: React.FC = () => {
       <Stack direction="row" alignItems="center" columnGap={3}>
         <Button onClick={() => navigate("/")}>TOPへ</Button>
         <Typography>{isRecording ? "recording... 🎙" : "stopped 💤"}</Typography>
+        {isRecording && <TimeCount startedAt={new Date()} />}
         <RecorderForHeader />
       </Stack>
       <Divider />
