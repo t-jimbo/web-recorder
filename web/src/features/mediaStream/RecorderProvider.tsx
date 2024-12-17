@@ -14,6 +14,7 @@ export const MediaStreamRecorderProvider: React.FC<
     resumeRecording,
     isRecording,
     src,
+    recorder,
   } = useRecorder();
 
   return (
@@ -29,6 +30,7 @@ export const MediaStreamRecorderProvider: React.FC<
         resumeRecording,
         isRecording,
         src,
+        recorder,
       }}
     >
       {children}

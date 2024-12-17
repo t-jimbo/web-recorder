@@ -1,48 +1,36 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { MediaStreamRecorderProvider } from "./features/mediaStream/RecorderProvider.tsx";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./features/auth/AuthProvider.tsx";
-import Index from "./pages/index.tsx";
-import SimpleRecorder from "./pages/simple-recorder.tsx";
-import Deal from "./pages/deal/index.tsx";
-import Images from "./pages/deal/images.tsx";
-import { Layout } from "./features/mediaStream/Layout.tsx";
-import Oauth from "./pages/oauth.tsx";
-import GCS from "./pages/gcs.tsx";
+import { ServiceWorkerProvider } from "./features/serviceWorker/provider.tsx";
 
-const router = createBrowserRouter([
-  {
-    element: <Layout />,
-    children: [
-      {
-        path: "/",
-        element: <Index />,
-      },
-      {
-        path: "/simple-recorder",
-        element: <SimpleRecorder />,
-      },
-      {
-        path: "/deal",
-        element: <Deal />,
-      },
-      { path: "/deal/images", element: <Images /> },
-    ],
-  },
-  { path: "/gcs", element: <GCS /> },
-  {
-    path: "oauth",
-    element: <Oauth />,
-  },
-]);
+const Index = React.lazy(() => import("./pages/index.tsx"));
+const SimpleRecorder = React.lazy(() => import("./pages/simple-recorder.tsx"));
+const Deal = React.lazy(() => import("./pages/deal/index.tsx"));
+const Images = React.lazy(() => import("./pages/deal/images.tsx"));
+const Oauth = React.lazy(() => import("./pages/oauth.tsx"));
+const GCS = React.lazy(() => import("./pages/gcs.tsx"));
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <AuthProvider>
-      <MediaStreamRecorderProvider>
-        <RouterProvider router={router} />
-      </MediaStreamRecorderProvider>
+      <ServiceWorkerProvider>
+        <MediaStreamRecorderProvider>
+          <React.Suspense fallback={<>"loading"</>}>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/simple-recorder" element={<SimpleRecorder />} />
+                <Route path="/deal" element={<Deal />} />
+                <Route path="/deal/images" element={<Images />} />
+                <Route path="/gcs" element={<GCS />} />
+                <Route path="/oauth" element={<Oauth />} />
+              </Routes>
+            </BrowserRouter>
+          </React.Suspense>
+        </MediaStreamRecorderProvider>
+      </ServiceWorkerProvider>
     </AuthProvider>
   </React.StrictMode>
 );

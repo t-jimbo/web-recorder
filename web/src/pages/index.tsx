@@ -2,9 +2,23 @@ import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
+import { MediaStreamRecorderContext } from "../features/mediaStream/context.ts";
+import { useContext } from "react";
 
 const Page: React.FC = () => {
   const navigate = useNavigate();
+  const { isRecording, src, recorder } = useContext(MediaStreamRecorderContext);
+
+  // if (import.meta.env.PROD)
+  return (
+    <div>
+      <Typography>{isRecording ? "recording" : "stopped"}</Typography>
+      <Typography>
+        <Typography>{src ? JSON.stringify(src) : "undefined"}</Typography>
+      </Typography>
+      <Typography>{recorder?.audioBitsPerSecond}</Typography>
+    </div>
+  );
 
   return (
     <Stack rowGap={3}>
