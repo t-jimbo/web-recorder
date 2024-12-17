@@ -8,10 +8,12 @@ export type MediaStreamRecorderContextValue = {
   isRecording: boolean;
   src:
     | {
+        size: number;
         url: string;
         type: string;
       }
     | undefined;
+  recorder: MediaRecorder | undefined | null;
 };
 
 export const MediaStreamRecorderContext =
@@ -20,4 +22,5 @@ export const MediaStreamRecorderContext =
     stopRecording: () => null,
     isRecording: false,
     src: undefined,
+    recorder: undefined,
   });

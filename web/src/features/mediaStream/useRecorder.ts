@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
  */
 export const useRecorder = () => {
   const [recorder, setRecorder] = useState<MediaRecorder | null>();
-  const [src, setSrc] = useState<{ url: string; type: string }>();
+  const [src, setSrc] = useState<{ size: number; url: string; type: string }>();
   const [isRecording, setIsRecording] = useState(false);
   const [intervalID, setIntervalID] = useState<number>();
 
@@ -26,6 +26,7 @@ export const useRecorder = () => {
       recorder.addEventListener("dataavailable", (e) => {
         send(e.data);
         setSrc({
+          size: e.data.size,
           url: URL.createObjectURL(e.data),
           type: e.data.type,
         });
@@ -78,5 +79,6 @@ export const useRecorder = () => {
     resumeRecording,
     src,
     isRecording,
+    recorder,
   };
 };
